@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   TrendingUp, Users, DollarSign, Star, CheckCircle2, XCircle,
   MessageCircle, Facebook, Phone, Wifi, WifiOff, AlertCircle,
-  ExternalLink, Copy, RefreshCw, ChevronRight, Zap, Shield, Check
+  ExternalLink, Copy, RefreshCw, ChevronRight, Zap, Shield, Check,
+  Send, Radio,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { Card } from "@/components/ui/card";
@@ -11,16 +12,16 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeProvider } from "@/hooks/use-realtime-provider";
+import { useRealtimeBookings } from "@/hooks/use-realtime-bookings";
+import { DEMO_PROVIDER_ID } from "@/lib/realtime";
 
 export const Route = createFileRoute("/provider")({
   component: Provider,
 });
-
-const requests = [
-  { name: "Sara Khalil", service: "Full car wash", time: "Today 3:00 PM", note: "SUV, exterior + interior" },
-  { name: "Omar Hassan", service: "Express wash", time: "Today 5:30 PM", note: "Sedan" },
-  { name: "Layla Ahmad", service: "Premium detail", time: "Tomorrow 11:00 AM" },
-];
 
 type ConnectionStatus = "disconnected" | "connecting" | "connected" | "error";
 
