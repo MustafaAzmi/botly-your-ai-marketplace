@@ -219,29 +219,71 @@ function StatusBadge({ status }: { status: ConnectionStatus }) {
 }
 
 function Provider() {
+  const { provider, setAvailability } = useRealtimeProvider(DEMO_PROVIDER_ID);
+  const { bookings, updateStatus } = useRealtimeBookings({
+    providerId: DEMO_PROVIDER_ID,
+    notify: true,
+  });
+  const [sending, setSending] = useState(false);
+
+  const pending = bookings.filter((b) => b.status === "pending");
+
+  const sendDemoBooking = async () => {
+    setSending(true);
+    const names = ["Yasmin Farouk", "Karim Adel", "Hala Mostafa", "Ziad Tarek", "Nour El-Din"];
+    const services = ["Full car wash", "Express wash", "Premium detail", "Interior cleaning"];
+    const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
+    const { error } = await supabase.from("bookings").insert({
+      provider_id: DEMO_PROVIDER_ID,
+      customer_name: pick(names),
+      service: pick(services),
+      note: "Sent from demo trigger",
+      status: "pending",
+    });
+    if (error) toast.error("Could not send booking", { description: error.message });
+    setSending(false);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SiteHeader />
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent text-3xl">🚗</div>
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent text-3xl">
+              {provider?.emoji ?? "🚗"}
+            </div>
             <div>
-              <h1 className="font-display text-2xl md:text-3xl font-bold">ShineUp Auto Spa</h1>
-              <p className="text-sm text-muted-foreground">Car Wash · Verified provider</p>
+              <h1 className="font-display text-2xl md:text-3xl font-bold">
+                {provider?.name ?? "Loading…"}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {provider?.category ?? "—"} · Verified provider
+              </p>
             </div>
           </div>
           <Card className="flex items-center gap-3 px-4 py-3 rounded-2xl">
-            <div className="h-2.5 w-2.5 rounded-full bg-success animate-pulse-ring" />
-            <Label htmlFor="online" className="text-sm font-medium">Available</Label>
-            <Switch id="online" defaultChecked />
+            <div className={`h-2.5 w-2.5 rounded-full ${provider?.is_available ? "bg-success animate-pulse-ring" : "bg-muted-foreground"}`} />
+            <Label htmlFor="online" className="text-sm font-medium">
+              {provider?.is_available ? "Available" : "Offline"}
+            </Label>
+            <Switch
+              id="online"
+              checked={provider?.is_available ?? false}
+              onCheckedChange={(v) => {
+                setAvailability(v);
+                toast(v ? "You're now available" : "You're offline", {
+                  description: "Status broadcast to all customers in realtime.",
+                });
+              }}
+            />
           </Card>
         </div>
 
         <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { label: "Total leads", value: "284", trend: "+12%", icon: Users },
-            { label: "This month", value: "47", trend: "+8%", icon: TrendingUp },
+            { label: "Total leads", value: String(bookings.length || 284), trend: "+12%", icon: Users },
+            { label: "Pending", value: String(pending.length), trend: "live", icon: TrendingUp },
             { label: "Earnings", value: "$4,820", trend: "+18%", icon: DollarSign },
             { label: "Rating", value: "4.9", trend: "312 reviews", icon: Star },
           ].map((s) => (
@@ -267,29 +309,59 @@ function Provider() {
 
         <div className="mt-8 grid gap-5 lg:grid-cols-3">
           <Card className="lg:col-span-2 p-6 rounded-2xl">
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-lg font-semibold">Incoming requests</h2>
-              <Badge variant="secondary" className="bg-primary/15 text-primary border-0">{requests.length} new</Badge>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-2">
+                <h2 className="font-display text-lg font-semibold">Incoming requests</h2>
+                <Badge variant="secondary" className="bg-success/15 text-success border-0 gap-1">
+                  <Radio className="h-3 w-3 animate-pulse" /> Live
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="bg-primary/15 text-primary border-0">
+                  {pending.length} pending
+                </Badge>
+                <Button size="sm" variant="outline" className="rounded-lg gap-1.5" onClick={sendDemoBooking} disabled={sending}>
+                  <Send className="h-3.5 w-3.5" />
+                  {sending ? "Sending…" : "Test booking"}
+                </Button>
+              </div>
             </div>
             <div className="mt-5 space-y-3">
-              {requests.map((r, i) => (
-                <div key={i} className="flex flex-col sm:flex-row gap-3 p-4 rounded-xl bg-muted/40">
+              {bookings.length === 0 && (
+                <div className="text-center py-12 text-sm text-muted-foreground">
+                  No bookings yet. Hit “Test booking” to see realtime in action.
+                </div>
+              )}
+              {bookings.map((b) => (
+                <div key={b.id} className="flex flex-col sm:flex-row gap-3 p-4 rounded-xl bg-muted/40 animate-in fade-in slide-in-from-top-2 duration-500">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-sm">{r.name}</p>
-                      <Badge variant="outline" className="text-[10px]">{r.time}</Badge>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-semibold text-sm">{b.customer_name}</p>
+                      <Badge variant="outline" className="text-[10px]">
+                        {formatDistanceToNow(new Date(b.created_at), { addSuffix: true })}
+                      </Badge>
+                      {b.status !== "pending" && (
+                        <Badge
+                          variant="secondary"
+                          className={`text-[10px] ${b.status === "accepted" ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"} border-0`}
+                        >
+                          {b.status}
+                        </Badge>
+                      )}
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">{r.service}</p>
-                    {r.note && <p className="text-xs text-muted-foreground mt-1">📝 {r.note}</p>}
+                    <p className="text-sm text-muted-foreground mt-1">{b.service}</p>
+                    {b.note && <p className="text-xs text-muted-foreground mt-1">📝 {b.note}</p>}
                   </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="rounded-lg gap-1">
-                      <XCircle className="h-3.5 w-3.5" /> Decline
-                    </Button>
-                    <Button size="sm" className="rounded-lg gap-1">
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Accept
-                    </Button>
-                  </div>
+                  {b.status === "pending" && (
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" className="rounded-lg gap-1" onClick={() => updateStatus(b.id, "declined")}>
+                        <XCircle className="h-3.5 w-3.5" /> Decline
+                      </Button>
+                      <Button size="sm" className="rounded-lg gap-1" onClick={() => updateStatus(b.id, "accepted")}>
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Accept
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
