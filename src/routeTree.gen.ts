@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProviderRouteImport } from './routes/provider'
+import { Route as MerchantStoreRouteImport } from './routes/merchant-store'
+import { Route as MerchantLoginRouteImport } from './routes/merchant-login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -24,6 +26,16 @@ const SearchRoute = SearchRouteImport.update({
 const ProviderRoute = ProviderRouteImport.update({
   id: '/provider',
   path: '/provider',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchantStoreRoute = MerchantStoreRouteImport.update({
+  id: '/merchant-store',
+  path: '/merchant-store',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchantLoginRoute = MerchantLoginRouteImport.update({
+  id: '/merchant-login',
+  path: '/merchant-login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -52,6 +64,8 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
+  '/merchant-login': typeof MerchantLoginRoute
+  '/merchant-store': typeof MerchantStoreRoute
   '/provider': typeof ProviderRoute
   '/search': typeof SearchRoute
 }
@@ -60,6 +74,8 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
+  '/merchant-login': typeof MerchantLoginRoute
+  '/merchant-store': typeof MerchantStoreRoute
   '/provider': typeof ProviderRoute
   '/search': typeof SearchRoute
 }
@@ -69,6 +85,8 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
+  '/merchant-login': typeof MerchantLoginRoute
+  '/merchant-store': typeof MerchantStoreRoute
   '/provider': typeof ProviderRoute
   '/search': typeof SearchRoute
 }
@@ -79,16 +97,28 @@ export interface FileRouteTypes {
     | '/admin'
     | '/categories'
     | '/dashboard'
+    | '/merchant-login'
+    | '/merchant-store'
     | '/provider'
     | '/search'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/categories' | '/dashboard' | '/provider' | '/search'
+  to:
+    | '/'
+    | '/admin'
+    | '/categories'
+    | '/dashboard'
+    | '/merchant-login'
+    | '/merchant-store'
+    | '/provider'
+    | '/search'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/categories'
     | '/dashboard'
+    | '/merchant-login'
+    | '/merchant-store'
     | '/provider'
     | '/search'
   fileRoutesById: FileRoutesById
@@ -98,6 +128,8 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   CategoriesRoute: typeof CategoriesRoute
   DashboardRoute: typeof DashboardRoute
+  MerchantLoginRoute: typeof MerchantLoginRoute
+  MerchantStoreRoute: typeof MerchantStoreRoute
   ProviderRoute: typeof ProviderRoute
   SearchRoute: typeof SearchRoute
 }
@@ -116,6 +148,20 @@ declare module '@tanstack/react-router' {
       path: '/provider'
       fullPath: '/provider'
       preLoaderRoute: typeof ProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merchant-store': {
+      id: '/merchant-store'
+      path: '/merchant-store'
+      fullPath: '/merchant-store'
+      preLoaderRoute: typeof MerchantStoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merchant-login': {
+      id: '/merchant-login'
+      path: '/merchant-login'
+      fullPath: '/merchant-login'
+      preLoaderRoute: typeof MerchantLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -154,6 +200,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   CategoriesRoute: CategoriesRoute,
   DashboardRoute: DashboardRoute,
+  MerchantLoginRoute: MerchantLoginRoute,
+  MerchantStoreRoute: MerchantStoreRoute,
   ProviderRoute: ProviderRoute,
   SearchRoute: SearchRoute,
 }

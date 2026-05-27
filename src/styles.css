@@ -161,6 +161,35 @@
       radial-gradient(ellipse 50% 40% at 50% 100%, oklch(0.72 0.18 152 / 0.12), transparent 60%);
   }
 
+  .bg-wave-blue {
+    background:
+      radial-gradient(ellipse 70% 50% at 10% 10%, oklch(0.85 0.12 230 / 0.45), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 20%, oklch(0.78 0.14 220 / 0.35), transparent 60%),
+      radial-gradient(ellipse 80% 60% at 50% 100%, oklch(0.88 0.08 210 / 0.5), transparent 65%),
+      linear-gradient(180deg, oklch(0.99 0.01 220) 0%, oklch(0.96 0.03 220) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .bg-wave-blue::before,
+  .bg-wave-blue::after {
+    content: "";
+    position: absolute;
+    inset: auto -10% -20% -10%;
+    height: 60%;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .bg-wave-blue::before {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'><path fill='%2360a5fa' fill-opacity='0.25' d='M0,160L60,176C120,192,240,224,360,213.3C480,203,600,149,720,144C840,139,960,181,1080,186.7C1200,192,1320,160,1380,144L1440,128L1440,320L0,320Z'/></svg>");
+  }
+  .bg-wave-blue::after {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'><path fill='%233b82f6' fill-opacity='0.35' d='M0,224L80,213.3C160,203,320,181,480,192C640,203,800,245,960,234.7C1120,224,1280,160,1360,128L1440,96L1440,320L0,320Z'/></svg>");
+    inset: auto -10% -25% -10%;
+    height: 50%;
+  }
+
   .glass {
     background: color-mix(in oklab, var(--card) 70%, transparent);
     backdrop-filter: blur(20px) saturate(140%);
